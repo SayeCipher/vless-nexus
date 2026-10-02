@@ -10,8 +10,7 @@ Paste. Convert. Copy. Done. ⚡
 [![Online](https://img.shields.io/badge/Live-online%20now-7c4dff?style=for-the-badge&logo=githubpages&logoColor=white)](https://sayecipher.github.io/vless-nexus/)
 [![Nahan Panel](https://img.shields.io/badge/Nahan%20Panel-fully%20compatible-12a36b?style=for-the-badge)](https://github.com/itsyebekhe/nahan)
 
-**🌐 [Live](https://sayecipher.github.io/vless-nexus/)** &nbsp;•&nbsp; **📄 [Source](https://github.com/SayeCipher/vless-nexus/blob/main/index.html)** &nbsp;•&nbsp; Crafted with ❤️ by **[@SayeCipher](https://github.com/SayeCipher)**
-
+**📄 [Source](https://github.com/SayeCipher/vless-nexus/blob/main/index.html)** &nbsp;•&nbsp; Crafted with ❤️ by **[@SayeCipher](https://github.com/SayeCipher)**
 </div>
 
 ---
