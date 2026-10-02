@@ -108,15 +108,34 @@ textarea{flex:1;width:100%;min-height:340px;resize:vertical;border:0;outline:0;b
 <script>
 const FM='fm=%7B%22tcp%22%3A%20%5B%7B%22type%22%3A%20%22fragment%22%2C%20%22settings%22%3A%20%7B%22packets%22%3A%20%22tlshello%22%2C%20%22lengths%22%3A%20%5B%220%22%2C%20%22104%22%2C%20%221%22%5D%2C%20%22delays%22%3A%20%5B%220%22%5D%2C%20%22maxSplit%22%3A%20%220%22%7D%7D%2C%7B%22type%22%3A%20%22fragment%22%2C%20%22settings%22%3A%20%7B%22packets%22%3A%20%221-1%22%2C%20%22lengths%22%3A%20%5B%22114%22%2C%20%221%22%5D%2C%20%22delays%22%3A%20%5B%221%22%5D%2C%20%22maxSplit%22%3A%20%2211%22%7D%7D%5D%7D';
 const $=id=>document.getElementById(id);
-function decode(t){try{return atob(t.replace(/\s/g,''))}catch(e){return t}}
-function fix(x){x=x.trim();if(!x.startsWith('vless://'))return null;x=x.replace('fp=chrome','fp=unsafe');let sep=x.includes('?')?'&':'?';if(!x.includes('fm='))x+=sep+FM;if(!x.includes('insecure=0'))x+='&insecure=0';if(!x.includes('allowInsecure=0'))x+='&allowInsecure=0';return x}
+function decode(t){
+  if(/vless:\/\//i.test(t))return t;
+  try{
+    const b=atob(t.replace(/\s/g,'').replace(/-/g,'+').replace(/_/g,'/'));
+    return new TextDecoder().decode(Uint8Array.from(b,c=>c.charCodeAt(0)));
+  }catch(e){return t}
+}
+function fix(line){
+  const i=line.search(/vless:\/\//i);
+  if(i<0)return null;
+  const x=line.slice(i).trim(),h=x.indexOf('#');
+  let base=h<0?x:x.slice(0,h);
+  const tag=h<0?'':x.slice(h);
+  base=base.replace(/([?&])fp=chrome(?=&|$)/g,'$1fp=unsafe');
+  const has=k=>new RegExp('[?&]'+k+'=').test(base);
+  const add=p=>{base+=(base.includes('?')?'&':'?')+p};
+  if(!has('fm'))add(FM);
+  if(!has('insecure'))add('insecure=0');
+  if(!has('allowInsecure'))add('allowInsecure=0');
+  return base+tag;
+}
 function setStatus(m,err){$('status').textContent=m;$('dot').classList.toggle('err',!!err)}
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),1800)}
 function convert(){
   const lines=decode($('input').value).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
   const out=lines.map(fix).filter(Boolean);
-  $('output').value=out.join('\n\n');
-  $('sRead').textContent=lines.length;$('sOk').textContent=out.length;$('sSkip').textContent=lines.length-out.length;
+  $('output').value=out.map(l=>l+'\n\n').join('');
+  $('sRead').textContent=lines.length;$('sOk').textContent=out.length;$('sSkip').textContent=Math.max(0,lines.length-out.length);
   if(!lines.length)setStatus('Nothing to convert. Paste configs, load a subscription or add a file.',true);
   else if(!out.length)setStatus('No vless:// links found in the input.',true);
   else setStatus(out.length+' configuration'+(out.length>1?'s':'')+' converted')
